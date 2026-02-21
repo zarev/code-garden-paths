@@ -11,6 +11,7 @@ import HamburgerMenu from "@/components/HamburgerMenu";
 type LoadState = "loading" | "processing" | "layouting" | "ready" | "error";
 
 const Index = () => {
+  const [menuOpen, setMenuOpen] = useState(false);
   const [loadState, setLoadState] = useState<LoadState>("loading");
   const [graph, setGraph] = useState<ProcessedGraph | null>(null);
   const [error, setError] = useState<string>("");
@@ -149,7 +150,7 @@ const Index = () => {
 
   return (
     <div className="relative w-screen h-screen overflow-hidden bg-background">
-      <HamburgerMenu onGraphLoaded={handleGraphLoaded} />
+      <HamburgerMenu isOpen={menuOpen} onClose={() => setMenuOpen(false)} onGraphLoaded={handleGraphLoaded} />
       <GraphCanvas
         graph={graph}
         onNodeHover={handleNodeHover}
@@ -161,6 +162,7 @@ const Index = () => {
       <Legend
         visibleCategories={visibleCategories}
         toggleCategory={toggleCategory}
+        onMenuClick={() => setMenuOpen(true)}
         stats={graph.stats}
       />
 
