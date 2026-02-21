@@ -20,7 +20,7 @@ const CATEGORIES: { key: NodeCategory; label: string; desc: string }[] = [
 
 export default function Legend({ visibleCategories, toggleCategory, stats }: Props) {
   return (
-    <div className="absolute top-4 left-4 bg-card/90 backdrop-blur-sm rounded-lg p-4 border border-border shadow-xl max-w-[220px]">
+    <div className="absolute top-16 left-4 bg-card/90 backdrop-blur-sm rounded-lg p-4 border border-border shadow-xl max-w-[220px]">
       <h3 className="font-mono text-xs font-semibold text-foreground mb-3 tracking-wider uppercase">
         Traffic Map
       </h3>
