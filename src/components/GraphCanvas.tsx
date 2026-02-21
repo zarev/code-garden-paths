@@ -156,11 +156,12 @@ export default function GraphCanvas({ graph, onNodeHover, onNodeClick, visibleCa
     }
 
     // Draw nodes (buildings)
+    const sizeScale = 1 / Math.pow(transform.scale, 0.5);
     for (const node of nodes) {
       const color = CATEGORY_COLORS[node.category];
       const glow = CATEGORY_GLOW[node.category];
       const isHovered = hoveredRef.current?.id === node.id;
-      const s = node.size * (isHovered ? 1.4 : 1);
+      const s = node.size * (isHovered ? 1.4 : 1) * sizeScale;
 
       // Glow ring
       ctx.fillStyle = glow;
