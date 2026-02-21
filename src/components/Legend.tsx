@@ -22,15 +22,16 @@ const CATEGORIES: { key: NodeCategory; label: string; desc: string }[] = [
 
 export default function Legend({ visibleCategories, toggleCategory, onMenuClick, stats }: Props) {
   return (
-    <div className="absolute top-4 left-4 bg-card/90 backdrop-blur-sm rounded-lg p-4 border border-border shadow-xl max-w-[220px]">
+    <div className="absolute top-4 left-4 z-20 bg-card/90 backdrop-blur-sm rounded-lg p-4 border border-border shadow-xl max-w-[220px]">
       <div className="flex items-center justify-between mb-3">
         <h3 className="font-mono text-xs font-semibold text-foreground tracking-wider uppercase">
           Traffic Map
         </h3>
         <button
-          onClick={onMenuClick}
-          className="p-1 rounded hover:bg-secondary/50 transition-colors"
+          onClick={(e) => { e.stopPropagation(); onMenuClick?.(); }}
+          className="p-1.5 rounded hover:bg-secondary/50 transition-colors cursor-pointer z-10"
           title="Settings"
+          type="button"
         >
           <Menu className="w-4 h-4 text-muted-foreground" />
         </button>
