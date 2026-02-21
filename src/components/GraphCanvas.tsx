@@ -36,6 +36,38 @@ export default function GraphCanvas({ graph, onNodeHover, onNodeClick, visibleCa
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const hoveredRef = useRef<FileNode | null>(null);
   const animFrameRef = useRef<number>(0);
+  const hasInitialized = useRef(false);
+
+  // Center and fit the graph on initial load
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas || graph.nodes.length === 0) return;
+    if (hasInitialized.current) return;
+    hasInitialized.current = true;
+
+    const nodes = graph.nodes;
+    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    for (const n of nodes) {
+      if (n.x < minX) minX = n.x;
+      if (n.x > maxX) maxX = n.x;
+      if (n.y < minY) minY = n.y;
+      if (n.y > maxY) maxY = n.y;
+    }
+
+    const graphWidth = maxX - minX || 1;
+    const graphHeight = maxY - minY || 1;
+    const canvasWidth = canvas.clientWidth;
+    const canvasHeight = canvas.clientHeight;
+    const padding = 0.85;
+    const scale = Math.min(
+      (canvasWidth * padding) / graphWidth,
+      (canvasHeight * padding) / graphHeight
+    );
+    const centerX = canvasWidth / 2 - ((minX + maxX) / 2) * scale;
+    const centerY = canvasHeight / 2 - ((minY + maxY) / 2) * scale;
+
+    setTransform({ x: centerX, y: centerY, scale });
+  }, [graph.nodes]);
 
   const getVisibleNodes = useCallback(() => {
     return graph.nodes.filter(n => {
