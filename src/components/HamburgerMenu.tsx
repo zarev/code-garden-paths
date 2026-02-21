@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { X, Globe, Github, Upload, Loader2, Settings } from "lucide-react";
+import { X, Globe, Github, Key, FileText, Loader2, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -13,9 +13,21 @@ interface HamburgerMenuProps {
 
 export default function HamburgerMenu({ isOpen, onClose, onGraphLoaded }: HamburgerMenuProps) {
   const [apiUrl, setApiUrl] = useState(() => localStorage.getItem("cf_api_url") || "");
+  const [geminiKey, setGeminiKey] = useState(() => localStorage.getItem("cf_gemini_key") || "");
+  const [projectContext, setProjectContext] = useState(() => localStorage.getItem("cf_project_context") || "");
   const [repoUrl, setRepoUrl] = useState("");
   const [maxFiles, setMaxFiles] = useState("200");
   const [loading, setLoading] = useState(false);
+
+  const saveGeminiKey = () => {
+    localStorage.setItem("cf_gemini_key", geminiKey);
+    toast.success("Gemini API key saved");
+  };
+
+  const saveProjectContext = () => {
+    localStorage.setItem("cf_project_context", projectContext);
+    toast.success("Project context saved");
+  };
 
   const saveApiUrl = () => {
     localStorage.setItem("cf_api_url", apiUrl);
@@ -150,53 +162,50 @@ export default function HamburgerMenu({ isOpen, onClose, onGraphLoaded }: Hambur
 
             <div className="h-px bg-border" />
 
-            {/* Upload Zip */}
+            {/* Gemini API Key */}
             <section>
               <div className="flex items-center gap-2 mb-3">
-                <Upload className="w-4 h-4 text-muted-foreground" />
+                <Key className="w-4 h-4 text-muted-foreground" />
                 <h3 className="font-mono text-xs font-semibold text-foreground tracking-wider uppercase">
-                  Upload .zip
+                  Gemini API Key
                 </h3>
               </div>
-              <label className="block">
-                <input
-                  type="file"
-                  accept=".zip"
-                  className="hidden"
-                  onChange={async (e) => {
-                    const file = e.target.files?.[0];
-                    if (!file) return;
-                    if (!apiUrl.trim()) {
-                      toast.error("Please set the Cloudflare API URL first");
-                      return;
-                    }
-                    setLoading(true);
-                    try {
-                      const form = new FormData();
-                      form.append("file", file);
-                      const url = maxFiles
-                        ? `${apiUrl.replace(/\/$/, "")}/parse?max_files=${encodeURIComponent(maxFiles)}`
-                        : `${apiUrl.replace(/\/$/, "")}/parse`;
-                      const res = await fetch(url, { method: "POST", body: form });
-                      if (!res.ok) throw new Error(`Upload failed (${res.status})`);
-                      const data = await res.json();
-                      if (!data.links && data.edges) data.links = data.edges;
-                      onGraphLoaded(data);
-                      toast.success("Zip analyzed successfully");
-                      onClose();
-                    } catch (err) {
-                      toast.error(err instanceof Error ? err.message : "Upload failed");
-                    } finally {
-                      setLoading(false);
-                    }
-                  }}
+              <div className="flex gap-2">
+                <Input
+                  value={geminiKey}
+                  onChange={e => setGeminiKey(e.target.value)}
+                  placeholder="AIza..."
+                  type="password"
+                  className="text-xs font-mono h-8 bg-secondary/50 border-border"
                 />
-                <div className="flex items-center justify-center h-16 rounded-lg border border-dashed border-border hover:border-primary/50 hover:bg-secondary/30 cursor-pointer transition-colors">
-                  <span className="text-xs text-muted-foreground font-mono">
-                    Click to upload .zip file
-                  </span>
-                </div>
-              </label>
+                <Button size="sm" variant="secondary" onClick={saveGeminiKey} className="h-8 px-3 text-xs">
+                  Save
+                </Button>
+              </div>
+            </section>
+
+            <div className="h-px bg-border" />
+
+            {/* Project Context */}
+            <section>
+              <div className="flex items-center gap-2 mb-3">
+                <FileText className="w-4 h-4 text-muted-foreground" />
+                <h3 className="font-mono text-xs font-semibold text-foreground tracking-wider uppercase">
+                  Project Context
+                </h3>
+              </div>
+              <div className="space-y-2">
+                <textarea
+                  value={projectContext}
+                  onChange={e => setProjectContext(e.target.value)}
+                  placeholder="Describe what this repository is about, its architecture, key technologies, etc."
+                  rows={6}
+                  className="flex w-full rounded-md border border-border bg-secondary/50 px-3 py-2 text-xs font-mono ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 resize-y"
+                />
+                <Button size="sm" variant="secondary" onClick={saveProjectContext} className="h-8 px-3 text-xs w-full">
+                  Save Context
+                </Button>
+              </div>
             </section>
           </div>
         </div>
