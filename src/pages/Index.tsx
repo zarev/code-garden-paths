@@ -86,6 +86,25 @@ const Index = () => {
     return counts;
   }, [graph]);
 
+  const packageCongestion = useMemo(() => {
+    if (!graph) return new Map<string, number>();
+    const scores = new Map<string, number>();
+    let maxScore = 0;
+    graph.packages.forEach((ids, pkg) => {
+      const total = ids.reduce((sum, id) => {
+        const node = graph.nodes.find(n => n.id === id);
+        return sum + (node?.congestionScore ?? 0);
+      }, 0);
+      const avg = ids.length > 0 ? total / ids.length : 0;
+      scores.set(pkg, avg);
+      if (avg > maxScore) maxScore = avg;
+    });
+    if (maxScore > 0) {
+      scores.forEach((v, k) => scores.set(k, v / maxScore));
+    }
+    return scores;
+  }, [graph]);
+
   if (loadState !== "ready" || !graph) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-background gap-4">
@@ -133,6 +152,7 @@ const Index = () => {
         selectedPackage={selectedPackage}
         onSelect={setSelectedPackage}
         nodeCounts={nodeCounts}
+        congestionScores={packageCongestion}
       />
 
       {hoveredNode && (
