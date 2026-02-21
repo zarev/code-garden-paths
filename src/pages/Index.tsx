@@ -6,6 +6,7 @@ import NodeTooltip from "@/components/NodeTooltip";
 import PackageSelector from "@/components/PackageSelector";
 import NodeDetail from "@/components/NodeDetail";
 import AgentActions from "@/components/AgentActions";
+import HamburgerMenu from "@/components/HamburgerMenu";
 
 type LoadState = "loading" | "processing" | "layouting" | "ready" | "error";
 
@@ -20,33 +21,42 @@ const Index = () => {
   );
   const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
 
+  const loadGraphData = useCallback(async (raw: RawGraph) => {
+    try {
+      setLoadState("processing");
+      const processed = processGraph(raw);
+      setLoadState("layouting");
+      await new Promise(r => requestAnimationFrame(r));
+      const laid = layoutGraph(processed, 3000, 2000);
+      setGraph(laid);
+      setSelectedPackage(null);
+      setSelectedNode(null);
+      setLoadState("ready");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Unknown error");
+      setLoadState("error");
+    }
+  }, []);
+
   useEffect(() => {
     async function load() {
       try {
         setLoadState("loading");
         const resp = await fetch("/data/jwst_graph.json");
         if (!resp.ok) throw new Error("Failed to load graph data");
-        
-        setLoadState("processing");
         const raw: RawGraph = await resp.json();
-        
-        const processed = processGraph(raw);
-        
-        setLoadState("layouting");
-        // Use requestAnimationFrame to let UI update
-        await new Promise(r => requestAnimationFrame(r));
-        
-        const laid = layoutGraph(processed, 3000, 2000);
-        
-        setGraph(laid);
-        setLoadState("ready");
+        await loadGraphData(raw);
       } catch (e) {
         setError(e instanceof Error ? e.message : "Unknown error");
         setLoadState("error");
       }
     }
     load();
-  }, []);
+  }, [loadGraphData]);
+
+  const handleGraphLoaded = useCallback((raw: RawGraph) => {
+    loadGraphData(raw);
+  }, [loadGraphData]);
 
   const toggleCategory = useCallback((cat: NodeCategory) => {
     setVisibleCategories(prev => {
@@ -139,6 +149,7 @@ const Index = () => {
 
   return (
     <div className="relative w-screen h-screen overflow-hidden bg-background">
+      <HamburgerMenu onGraphLoaded={handleGraphLoaded} />
       <GraphCanvas
         graph={graph}
         onNodeHover={handleNodeHover}
