@@ -66,7 +66,17 @@ const Index = () => {
 
   const packages = useMemo(() => {
     if (!graph) return [];
-    return Array.from(graph.packages.keys()).sort();
+    // Sort packages by total congestion (sum of congestionScore of their nodes), descending
+    return Array.from(graph.packages.keys()).sort((a, b) => {
+      const scoreOf = (pkg: string) => {
+        const ids = graph.packages.get(pkg) || [];
+        return ids.reduce((sum, id) => {
+          const node = graph.nodes.find(n => n.id === id);
+          return sum + (node?.congestionScore ?? 0);
+        }, 0);
+      };
+      return scoreOf(b) - scoreOf(a);
+    });
   }, [graph]);
 
   const nodeCounts = useMemo(() => {
