@@ -88,21 +88,21 @@ const Index = () => {
 
   const packageCongestion = useMemo(() => {
     if (!graph) return new Map<string, number>();
-    const scores = new Map<string, number>();
-    let maxScore = 0;
+    const rawScores = new Map<string, number>();
     graph.packages.forEach((ids, pkg) => {
       const total = ids.reduce((sum, id) => {
         const node = graph.nodes.find(n => n.id === id);
         return sum + (node?.congestionScore ?? 0);
       }, 0);
-      const avg = ids.length > 0 ? total / ids.length : 0;
-      scores.set(pkg, avg);
-      if (avg > maxScore) maxScore = avg;
+      rawScores.set(pkg, ids.length > 0 ? total / ids.length : 0);
     });
-    if (maxScore > 0) {
-      scores.forEach((v, k) => scores.set(k, v / maxScore));
-    }
-    return scores;
+    // Rank-based percentile so colors distribute evenly (top 33% red, mid 33% yellow, bottom 33% green)
+    const sorted = [...rawScores.entries()].sort((a, b) => a[1] - b[1]);
+    const result = new Map<string, number>();
+    sorted.forEach(([pkg], i) => {
+      result.set(pkg, sorted.length > 1 ? i / (sorted.length - 1) : 0);
+    });
+    return result;
   }, [graph]);
 
   if (loadState !== "ready" || !graph) {
