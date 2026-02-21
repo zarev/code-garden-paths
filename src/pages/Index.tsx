@@ -5,6 +5,7 @@ import Legend from "@/components/Legend";
 import NodeTooltip from "@/components/NodeTooltip";
 import PackageSelector from "@/components/PackageSelector";
 import NodeDetail from "@/components/NodeDetail";
+import AgentActions from "@/components/AgentActions";
 
 type LoadState = "loading" | "processing" | "layouting" | "ready" | "error";
 
@@ -105,6 +106,11 @@ const Index = () => {
     return result;
   }, [graph]);
 
+  const topHotspot = useMemo(() => {
+    if (!graph) return undefined;
+    const sorted = [...packageCongestion.entries()].sort((a, b) => b[1] - a[1]);
+    return sorted.length > 0 ? sorted[0][0] : undefined;
+  }, [graph, packageCongestion]);
   if (loadState !== "ready" || !graph) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-background gap-4">
@@ -166,6 +172,8 @@ const Index = () => {
           onClose={() => setSelectedNode(null)}
         />
       )}
+
+      <AgentActions topHotspot={topHotspot} />
 
       {/* Title bar */}
       <div className="absolute bottom-4 right-4 text-right">
