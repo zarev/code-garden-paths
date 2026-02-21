@@ -1,8 +1,10 @@
+import { Menu } from "lucide-react";
 import type { NodeCategory } from "@/lib/graphProcessor";
 
 interface Props {
   visibleCategories: Set<NodeCategory>;
   toggleCategory: (cat: NodeCategory) => void;
+  onMenuClick?: () => void;
   stats: {
     totalFiles: number;
     totalEdges: number;
@@ -18,12 +20,21 @@ const CATEGORIES: { key: NodeCategory; label: string; desc: string }[] = [
   { key: "green", label: "Smooth", desc: "Well-contained modules" },
 ];
 
-export default function Legend({ visibleCategories, toggleCategory, stats }: Props) {
+export default function Legend({ visibleCategories, toggleCategory, onMenuClick, stats }: Props) {
   return (
-    <div className="absolute top-16 left-4 bg-card/90 backdrop-blur-sm rounded-lg p-4 border border-border shadow-xl max-w-[220px]">
-      <h3 className="font-mono text-xs font-semibold text-foreground mb-3 tracking-wider uppercase">
-        Traffic Map
-      </h3>
+    <div className="absolute top-4 left-4 bg-card/90 backdrop-blur-sm rounded-lg p-4 border border-border shadow-xl max-w-[220px]">
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="font-mono text-xs font-semibold text-foreground tracking-wider uppercase">
+          Traffic Map
+        </h3>
+        <button
+          onClick={onMenuClick}
+          className="p-1 rounded hover:bg-secondary/50 transition-colors"
+          title="Settings"
+        >
+          <Menu className="w-4 h-4 text-muted-foreground" />
+        </button>
+      </div>
       
       <div className="space-y-1.5">
         {CATEGORIES.map(cat => (

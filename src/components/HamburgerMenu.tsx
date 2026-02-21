@@ -1,16 +1,17 @@
 import { useState } from "react";
-import { Menu, X, Globe, Github, Upload, Loader2, Settings } from "lucide-react";
+import { X, Globe, Github, Upload, Loader2, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import type { RawGraph } from "@/lib/graphProcessor";
 
 interface HamburgerMenuProps {
+  isOpen: boolean;
+  onClose: () => void;
   onGraphLoaded: (data: RawGraph) => void;
 }
 
-export default function HamburgerMenu({ onGraphLoaded }: HamburgerMenuProps) {
-  const [isOpen, setIsOpen] = useState(false);
+export default function HamburgerMenu({ isOpen, onClose, onGraphLoaded }: HamburgerMenuProps) {
   const [apiUrl, setApiUrl] = useState(() => localStorage.getItem("cf_api_url") || "");
   const [repoUrl, setRepoUrl] = useState("");
   const [maxFiles, setMaxFiles] = useState("200");
@@ -52,7 +53,7 @@ export default function HamburgerMenu({ onGraphLoaded }: HamburgerMenuProps) {
 
       onGraphLoaded(data);
       toast.success("Repository analyzed successfully");
-      setIsOpen(false);
+      onClose();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Failed to analyze repository");
     } finally {
@@ -60,24 +61,18 @@ export default function HamburgerMenu({ onGraphLoaded }: HamburgerMenuProps) {
     }
   };
 
+  if (!isOpen) return null;
+
   return (
     <>
-      {/* Hamburger button */}
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="absolute top-4 left-4 z-50 p-2 rounded-lg bg-card/90 backdrop-blur-sm border border-border hover:bg-secondary/80 transition-colors"
-      >
-        {isOpen ? (
-          <X className="w-5 h-5 text-foreground" />
-        ) : (
-          <Menu className="w-5 h-5 text-foreground" />
-        )}
-      </button>
-
       {/* Slide-out panel */}
-      {isOpen && (
         <div className="absolute top-0 left-0 z-40 h-full w-[340px] bg-card/95 backdrop-blur-md border-r border-border shadow-2xl animate-in slide-in-from-left duration-200">
-          <div className="pt-16 px-5 pb-5 h-full flex flex-col gap-6 overflow-y-auto">
+          <div className="pt-4 px-5 pb-5 h-full flex flex-col gap-6 overflow-y-auto">
+            <div className="flex justify-end">
+              <button onClick={onClose} className="p-1 rounded hover:bg-secondary/50 transition-colors">
+                <X className="w-4 h-4 text-muted-foreground" />
+              </button>
+            </div>
             {/* API Configuration */}
             <section>
               <div className="flex items-center gap-2 mb-3">
@@ -187,7 +182,7 @@ export default function HamburgerMenu({ onGraphLoaded }: HamburgerMenuProps) {
                       if (!data.links && data.edges) data.links = data.edges;
                       onGraphLoaded(data);
                       toast.success("Zip analyzed successfully");
-                      setIsOpen(false);
+                      onClose();
                     } catch (err) {
                       toast.error(err instanceof Error ? err.message : "Upload failed");
                     } finally {
@@ -204,15 +199,12 @@ export default function HamburgerMenu({ onGraphLoaded }: HamburgerMenuProps) {
             </section>
           </div>
         </div>
-      )}
 
       {/* Backdrop */}
-      {isOpen && (
-        <div
-          className="absolute inset-0 z-30 bg-background/30"
-          onClick={() => setIsOpen(false)}
-        />
-      )}
+      <div
+        className="absolute inset-0 z-30 bg-background/30"
+        onClick={onClose}
+      />
     </>
   );
 }
