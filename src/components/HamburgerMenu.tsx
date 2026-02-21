@@ -39,12 +39,13 @@ export default function HamburgerMenu({ isOpen, onClose, onGraphLoaded }: Hambur
         : `${apiUrl.replace(/\/$/, "")}/parse?repo_url=${encodeURIComponent(repoUrl)}`;
 
       const res = await fetch(endpoint, { method: "POST" });
+      const text = await res.text();
+
       if (!res.ok) {
-        const text = await res.text();
-        throw new Error(`Upload failed (${res.status}): ${text}`);
+        throw new Error(`API error ${res.status}: ${text}`);
       }
 
-      const data = await res.json();
+      const data = JSON.parse(text);
 
       // Normalize edges → links
       if (!data.links && data.edges) {
