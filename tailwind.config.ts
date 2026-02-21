@@ -1,5 +1,7 @@
 import type { Config } from "tailwindcss";
 
+// @ts-ignore
+
 export default {
   darkMode: ["class"],
   content: ["./pages/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}", "./app/**/*.{ts,tsx}", "./src/**/*.{ts,tsx}"],
@@ -56,6 +58,17 @@ export default {
           "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
+        },
+        mm: {
+          red: "hsl(var(--mm-red))",
+          orange: "hsl(var(--mm-orange))",
+          blue: "hsl(var(--mm-blue))",
+          purple: "hsl(var(--mm-purple))",
+          green: "hsl(var(--mm-green))",
+          road: "hsl(var(--mm-road))",
+          "road-glow": "hsl(var(--mm-road-glow))",
+          surface: "hsl(var(--mm-surface))",
+          river: "hsl(var(--mm-river))",
         },
       },
       borderRadius: {
